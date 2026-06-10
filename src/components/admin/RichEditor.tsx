@@ -37,7 +37,7 @@ export default function RichEditor({ value, onChange }: Props) {
     content: value,
     onUpdate: ({ editor: e }) => onChange(e.getHTML()),
     editorProps: {
-      attributes: { class: 'prose prose-base dark:prose-dark max-w-none focus:outline-none px-4 py-4 min-h-96' },
+      attributes: { class: 'article-body focus:outline-none px-4 py-4 min-h-96' },
     },
   });
 

@@ -10,7 +10,7 @@ export default function AboutPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2" style={{ fontFamily: 'var(--font-syne)' }}>About Vyom</h1>
         <p className="text-brand-600 dark:text-brand-400 font-medium mb-8">Your Tech Universe</p>
-        <div className="prose prose-lg dark:prose-dark max-w-none">
+        <div className="article-body">
           <p>Welcome to <strong>Vyom</strong> — a modern technology publication dedicated to delivering accurate, insightful, and engaging tech content for enthusiasts, professionals, and everyday users alike.</p>
           <p>We cover everything from the latest smartphones and laptops to artificial intelligence, software, and the broader digital landscape. Our goal is simple: help you make sense of a rapidly changing tech world.</p>
           <h2>Our Mission</h2>

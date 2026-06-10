@@ -7,7 +7,7 @@ export default function CookiePolicyPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-syne)' }}>Cookie Policy</h1>
         <p className="text-gray-400 text-sm mb-8">Last updated: January 1, 2025</p>
-        <div className="prose prose-lg dark:prose-dark max-w-none">
+        <div className="article-body">
           <p>Vyom uses cookies and similar tracking technologies to improve your browsing experience and provide personalized content and advertising.</p>
           <h2>What Are Cookies?</h2>
           <p>Cookies are small text files stored on your device by your browser when you visit websites. They help websites remember your preferences and improve performance.</p>

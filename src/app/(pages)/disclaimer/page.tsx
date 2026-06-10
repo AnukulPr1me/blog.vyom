@@ -7,7 +7,7 @@ export default function DisclaimerPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-syne)' }}>Disclaimer</h1>
         <p className="text-gray-400 text-sm mb-8">Last updated: January 1, 2025</p>
-        <div className="prose prose-lg dark:prose-dark max-w-none">
+        <div className="article-body">
           <p>The information provided on Vyom (vyom.quest) is for general informational purposes only. All content is provided in good faith; however, we make no representation or warranty regarding accuracy, adequacy, validity, reliability, availability, or completeness.</p>
           <h2>No Professional Advice</h2>
           <p>Nothing on this site constitutes professional advice (financial, legal, medical, or otherwise). Always consult a qualified professional before making decisions based on our content.</p>

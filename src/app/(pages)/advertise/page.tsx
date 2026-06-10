@@ -10,7 +10,7 @@ export default function AdvertisePage() {
         <p className="text-gray-500 dark:text-gray-400 mb-10">Reach a targeted tech-savvy audience on Vyom.</p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div>
-            <div className="prose prose-lg dark:prose-dark max-w-none mb-8">
+            <div className="article-body mb-8">
               <h2>Why Advertise on Vyom?</h2>
               <ul>
                 <li>Targeted tech audience — readers who buy gadgets, software, and services</li>

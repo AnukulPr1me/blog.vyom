@@ -8,7 +8,7 @@ export default function PrivacyPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-syne)' }}>Privacy Policy</h1>
         <p className="text-gray-400 text-sm mb-8">Last updated: January 1, 2025</p>
-        <div className="prose prose-lg dark:prose-dark max-w-none">
+        <div className="article-body">
           <p>At Vyom (<strong>vyom.quest</strong>), we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect information about you when you visit our website.</p>
           <h2>Information We Collect</h2>
           <p>We may collect the following types of information:</p>

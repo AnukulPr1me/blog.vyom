@@ -7,7 +7,7 @@ export default function TermsPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-syne)' }}>Terms and Conditions</h1>
         <p className="text-gray-400 text-sm mb-8">Last updated: January 1, 2025</p>
-        <div className="prose prose-lg dark:prose-dark max-w-none">
+        <div className="article-body">
           <p>By accessing and using Vyom (vyom.quest), you accept and agree to be bound by these Terms and Conditions.</p>
           <h2>Use of Content</h2>
           <p>All content published on Vyom is for informational purposes. You may not reproduce, distribute, or republish our content without prior written permission.</p>
