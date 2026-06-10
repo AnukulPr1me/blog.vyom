@@ -99,7 +99,7 @@ export default function AdminDashboard() {
         <div className="card p-5">
           <h2 className="font-bold text-gray-900 dark:text-gray-100 mb-4" style={{ fontFamily: 'var(--font-syne)' }}>Quick Actions</h2>
           <div className="space-y-1">
-            {([
+            {[
               { href: '/admin/articles/new', Icon: Plus,        label: 'New Article',        cls: 'text-indigo-600 dark:text-indigo-400' },
               { href: '/admin/categories',   Icon: FolderOpen,  label: 'Categories',         cls: 'text-purple-600 dark:text-purple-400' },
               { href: '/admin/authors',      Icon: Users,       label: 'Authors',            cls: 'text-green-600 dark:text-green-400' },

@@ -96,7 +96,7 @@ export default function AdminSettingsPage() {
 
         <Section icon={Share2} title="Social Links">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(['twitter','facebook','instagram','youtube'].map(k => (
+            {['twitter','facebook','instagram','youtube'].map(k => (
               <div key={k}><label className="label capitalize">{k}</label><input value={settings.socialLinks[k]} onChange={e => setSocial(k, e.target.value)} placeholder="https://…" className="input" /></div>
             ))}
           </div>
