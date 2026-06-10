@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <h2>Cookies</h2>
           <p>We use cookies for analytics and advertising. You can control cookie preferences through your browser settings. See our <a href="/cookie-policy">Cookie Policy</a> for details.</p>
           <h2>Third-Party Services</h2>
-          <p>We use Google Analytics and Google AdSense, which may collect data per their own privacy policies. We don't sell your personal data to any third party.</p>
+          <p>We use Google Analytics and Google AdSense, which may collect data per their own privacy policies. We don&apos;t sell your personal data to any third party.</p>
           <h2>Data Retention</h2>
           <p>Newsletter subscriber emails are retained until you unsubscribe. Contact form messages are retained for 1 year.</p>
           <h2>Your Rights</h2>

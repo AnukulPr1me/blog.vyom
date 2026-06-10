@@ -14,7 +14,7 @@ export default function AboutPage() {
           <p>Welcome to <strong>Vyom</strong> — a modern technology publication dedicated to delivering accurate, insightful, and engaging tech content for enthusiasts, professionals, and everyday users alike.</p>
           <p>We cover everything from the latest smartphones and laptops to artificial intelligence, software, and the broader digital landscape. Our goal is simple: help you make sense of a rapidly changing tech world.</p>
           <h2>Our Mission</h2>
-          <p>At Vyom, we believe that technology coverage should be honest, well-researched, and accessible. We don't chase clicks or write sensational headlines — we write articles we'd want to read ourselves.</p>
+          <p>At Vyom, we believe that technology coverage should be honest, well-researched, and accessible. We don&apos;t chase clicks or write sensational headlines — we write articles we&apos;d want to read ourselves.</p>
           <h2>What We Cover</h2>
           <ul>
             <li><strong>Smartphones</strong> — Reviews, comparisons, and buying guides</li>
@@ -24,7 +24,7 @@ export default function AboutPage() {
             <li><strong>Reviews</strong> — Hands-on coverage of the latest gadgets</li>
           </ul>
           <h2>Editorial Independence</h2>
-          <p>Vyom maintains strict editorial independence. Our reviews and opinions are never influenced by advertisers or manufacturers. When we recommend a product, it's because we genuinely believe it's worth your attention.</p>
+          <p>Vyom maintains strict editorial independence. Our reviews and opinions are never influenced by advertisers or manufacturers. When we recommend a product, it&apos;s because we genuinely believe it&apos;s worth your attention.</p>
           <h2>Contact Us</h2>
           <p>Have a tip, question, or partnership inquiry? Reach us at <a href="mailto:hello@vyom.quest">hello@vyom.quest</a> or use our <a href="/contact">contact form</a>.</p>
         </div>

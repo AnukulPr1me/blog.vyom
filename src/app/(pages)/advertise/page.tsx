@@ -26,7 +26,7 @@ export default function AdvertisePage() {
                 <li><strong>Product Reviews</strong> — Editorial reviews of your products (subject to editorial policy)</li>
               </ul>
               <h2>Get in Touch</h2>
-              <p>Fill out the form and we'll get back to you within 48 hours with a media kit and pricing.</p>
+              <p>Fill out the form and we&apos;ll get back to you within 48 hours with a media kit and pricing.</p>
             </div>
           </div>
           <div className="card p-6"><ContactForm /></div>

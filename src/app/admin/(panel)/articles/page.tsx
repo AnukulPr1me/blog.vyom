@@ -15,41 +15,37 @@ export default function AdminArticlesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
-  const token = Cookies.get('vyom_token');
 
-  const fetch_ = useCallback(async () => {
+  const load = useCallback(() => {
+    const token = Cookies.get('vyom_token');
     setLoading(true);
-    try {
-      const p = new URLSearchParams({ admin: 'true', page: String(page), limit: '15', sort: '-createdAt' });
-      if (search) p.set('search', search);
-      if (statusFilter) p.set('status', statusFilter);
-      const res = await fetch(`/api/articles?${p}`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      setArticles(data.articles || []);
-      setTotal(data.total || 0);
-      setTotalPages(data.totalPages || 1);
-    } catch { toast.error('Failed to load articles'); }
-    finally { setLoading(false); }
-  }, [page, search, statusFilter, token]);
+    const p = new URLSearchParams({ admin: 'true', page: String(page), limit: '15', sort: '-createdAt' });
+    if (search) p.set('search', search);
+    if (statusFilter) p.set('status', statusFilter);
+    fetch(`/api/articles?${p}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => { setArticles(d.articles || []); setTotal(d.total || 0); setTotalPages(d.totalPages || 1); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [page, search, statusFilter]);
 
-  useEffect(() => { fetch_(); }, [fetch_]);
+  useEffect(() => { load(); }, [load]);
 
   const deleteArticle = async (id: string, title: string) => {
     if (!confirm(`Delete "${title}"?`)) return;
+    const token = Cookies.get('vyom_token');
     try {
       await fetch(`/api/articles/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-      toast.success('Article deleted');
-      fetch_();
+      toast.success('Deleted'); load();
     } catch { toast.error('Failed to delete'); }
   };
 
-  const toggleStatus = async (article: Article) => {
-    const newStatus = article.status === 'published' ? 'draft' : 'published';
+  const toggleStatus = async (a: Article) => {
+    const token = Cookies.get('vyom_token');
+    const newStatus = a.status === 'published' ? 'draft' : 'published';
     try {
-      await fetch(`/api/articles/${article._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status: newStatus }) });
-      toast.success(`Article ${newStatus}`);
-      fetch_();
-    } catch { toast.error('Failed to update'); }
+      await fetch(`/api/articles/${a._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status: newStatus }) });
+      toast.success(`Moved to ${newStatus}`); load();
+    } catch { toast.error('Failed'); }
   };
 
   return (
@@ -65,7 +61,7 @@ export default function AdminArticlesPage() {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search articles…" className="input pl-9 text-sm" />
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search…" className="input pl-9 text-sm" />
         </div>
         <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} className="input sm:w-40 text-sm">
           <option value="">All status</option>
@@ -80,13 +76,12 @@ export default function AdminArticlesPage() {
           <div className="p-6 space-y-3">{Array(6).fill(0).map((_, i) => <div key={i} className="h-14 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />)}</div>
         ) : articles.length === 0 ? (
           <div className="p-16 text-center text-gray-400">
-            <p>No articles found.</p>
-            <Link href="/admin/articles/new" className="text-brand-600 dark:text-brand-400 hover:underline text-sm mt-2 inline-block">Create your first →</Link>
+            <p>No articles found. <Link href="/admin/articles/new" className="text-indigo-600 dark:text-indigo-400 hover:underline">Create one →</Link></p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <thead className="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3 text-left">Title</th>
                   <th className="px-4 py-3 text-left hidden md:table-cell">Category</th>
@@ -107,7 +102,7 @@ export default function AdminArticlesPage() {
                     <td className="px-4 py-3 hidden lg:table-cell text-gray-400 text-xs whitespace-nowrap">{formatDate(a.createdAt)}</td>
                     <td className="px-4 py-3">
                       <button onClick={() => toggleStatus(a)} title="Click to toggle"
-                        className={`badge cursor-pointer hover:opacity-80 transition-opacity ${a.status === 'published' ? 'badge-green' : a.status === 'scheduled' ? 'badge-yellow' : 'badge-gray'}`}>
+                        className={`badge cursor-pointer hover:opacity-80 ${a.status === 'published' ? 'badge-green' : a.status === 'scheduled' ? 'badge-yellow' : 'badge-gray'}`}>
                         {a.status}
                       </button>
                     </td>
@@ -117,14 +112,17 @@ export default function AdminArticlesPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {a.status === 'published' && (
-                          <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" className="p-1.5 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors rounded" title="View live">
+                          <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" title="View live"
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded">
                             <ExternalLink size={14} />
                           </a>
                         )}
-                        <Link href={`/admin/articles/${a._id}`} className="p-1.5 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors rounded" title="Edit">
+                        <Link href={`/admin/articles/${a._id}`} title="Edit"
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded">
                           <Pencil size={14} />
                         </Link>
-                        <button onClick={() => deleteArticle(a._id, a.title)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded" title="Delete">
+                        <button onClick={() => deleteArticle(a._id, a.title)} title="Delete"
+                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -141,7 +139,7 @@ export default function AdminArticlesPage() {
         <div className="flex justify-center gap-2 mt-5">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
             <button key={p} onClick={() => setPage(p)}
-              className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${p === page ? 'bg-brand-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'}`}>
+              className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${p === page ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
               {p}
             </button>
           ))}

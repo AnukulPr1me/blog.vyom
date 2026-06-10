@@ -14,7 +14,7 @@ export default function TermsPage() {
           <h2>Intellectual Property</h2>
           <p>All articles, images, logos, and content on Vyom are owned by Vyom or their respective creators and protected by copyright law.</p>
           <h2>Disclaimer of Warranties</h2>
-          <p>Content is provided "as is" without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of any information.</p>
+          <p>Content is provided &quot;as is&quot; without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of any information.</p>
           <h2>Limitation of Liability</h2>
           <p>Vyom is not liable for any damages arising from your use of or inability to use this website.</p>
           <h2>External Links</h2>
