@@ -1,17 +1,12 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronUp, RefreshCw, Eye, Save, Send } from 'lucide-react';
 import { makeSlug, calcReadingTime, generateExcerpt } from '@/lib/utils';
 import type { Category, Author, Article } from '@/types';
+import RichEditor from './RichEditor';
 import Cookies from 'js-cookie';
-
-const RichEditor = dynamic(() => import('./RichEditor'), {
-  ssr: false,
-  loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
-});
 
 interface Props { article?: Article; }
 
@@ -19,28 +14,23 @@ export default function ArticleEditorForm({ article }: Props) {
   const router = useRouter();
   const isEdit = !!article;
 
-  // Core fields
   const [title, setTitle] = useState(article?.title || '');
   const [slug, setSlug] = useState(article?.slug || '');
   const [content, setContent] = useState(article?.content || '');
   const [featuredImage, setFeaturedImage] = useState(article?.featuredImage || '');
   const [excerpt, setExcerpt] = useState(article?.excerpt || '');
-  const [category, setCategory] = useState((article?.category as any)?._id || (article?.category as any) || '');
-  const [author, setAuthor] = useState((article?.author as any)?._id || (article?.author as any) || '');
+  const [category, setCategory] = useState((article?.category as any)?._id || '');
+  const [author, setAuthor] = useState((article?.author as any)?._id || '');
   const [tags, setTags] = useState(article?.tags?.join(', ') || '');
   const [status, setStatus] = useState(article?.status || 'draft');
   const [scheduledAt, setScheduledAt] = useState(
     article?.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : ''
   );
-
-  // SEO overrides
   const [seoOpen, setSeoOpen] = useState(false);
   const [metaTitle, setMetaTitle] = useState(article?.metaTitle || '');
   const [metaDesc, setMetaDesc] = useState(article?.metaDescription || '');
   const [seoKeywords, setSeoKeywords] = useState(article?.seoKeywords?.join(', ') || '');
   const [canonical, setCanonical] = useState(article?.canonicalUrl || '');
-
-  // Data
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [saving, setSaving] = useState(false);
@@ -60,24 +50,9 @@ export default function ArticleEditorForm({ article }: Props) {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Auto-slug from title
   useEffect(() => {
     if (!slugEdited && title) setSlug(makeSlug(title));
   }, [title, slugEdited]);
-
-  const getPayload = () => ({
-    title, slug, content, featuredImage,
-    excerpt: excerpt || undefined,
-    tags: tags.split(',').map((t: string) => t.trim()).filter(Boolean),
-    category: category || undefined,
-    author: author || undefined,
-    metaTitle: metaTitle || undefined,
-    metaDescription: metaDesc || undefined,
-    seoKeywords: seoKeywords.split(',').map((k: string) => k.trim()).filter(Boolean),
-    canonicalUrl: canonical || undefined,
-    status,
-    scheduledAt: status === 'scheduled' && scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
-  });
 
   const save = async (overrideStatus?: string) => {
     if (!title.trim()) { toast.error('Title is required'); return; }
@@ -85,11 +60,24 @@ export default function ArticleEditorForm({ article }: Props) {
     const token = Cookies.get('vyom_token');
     setSaving(true);
     try {
-      const payload = { ...getPayload(), ...(overrideStatus ? { status: overrideStatus } : {}) };
+      const payload = {
+        title, slug: slug || makeSlug(title), content,
+        featuredImage: featuredImage || undefined,
+        excerpt: excerpt || generateExcerpt(content),
+        tags: tags.split(',').map((t: string) => t.trim()).filter(Boolean),
+        category: category || undefined,
+        author: author || undefined,
+        metaTitle: metaTitle || undefined,
+        metaDescription: metaDesc || undefined,
+        seoKeywords: seoKeywords.split(',').map((k: string) => k.trim()).filter(Boolean),
+        canonicalUrl: canonical || undefined,
+        status: overrideStatus || status,
+        scheduledAt: (overrideStatus || status) === 'scheduled' && scheduledAt
+          ? new Date(scheduledAt).toISOString() : undefined,
+      };
       const url = isEdit ? `/api/articles/${article!._id}` : '/api/articles';
-      const method = isEdit ? 'PUT' : 'POST';
       const res = await fetch(url, {
-        method,
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
@@ -105,6 +93,7 @@ export default function ArticleEditorForm({ article }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: 'var(--font-syne)' }}>
@@ -114,7 +103,8 @@ export default function ArticleEditorForm({ article }: Props) {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {article?.slug && (
-            <a href={`/blog/${article.slug}`} target="_blank" rel="noopener noreferrer" className="btn-outline gap-1.5 text-xs py-2">
+            <a href={`/blog/${article.slug}`} target="_blank" rel="noopener noreferrer"
+              className="btn-outline gap-1.5 text-xs py-2">
               <Eye size={13} />Preview
             </a>
           )}
@@ -128,12 +118,14 @@ export default function ArticleEditorForm({ article }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main */}
+        {/* Main column */}
         <div className="lg:col-span-2 space-y-5">
           <div>
             <label className="label">Title *</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Article title…" className="input text-lg font-semibold" required />
+            <input value={title} onChange={e => setTitle(e.target.value)}
+              placeholder="Article title…" className="input text-lg font-semibold" />
           </div>
+
           <div>
             <label className="label flex items-center justify-between">
               <span>Slug</span>
@@ -142,43 +134,50 @@ export default function ArticleEditorForm({ article }: Props) {
                 <RefreshCw size={10} />Auto-generate
               </button>
             </label>
-            <input value={slug} onChange={e => { setSlug(e.target.value); setSlugEdited(true); }} placeholder="article-url-slug" className="input font-mono text-sm" />
+            <input value={slug} onChange={e => { setSlug(e.target.value); setSlugEdited(true); }}
+              placeholder="article-url-slug" className="input font-mono text-sm" />
           </div>
+
           <div>
             <label className="label">Content *</label>
             <RichEditor value={content} onChange={setContent} />
           </div>
+
           <div>
-            <label className="label">Excerpt / Short Description</label>
+            <label className="label">Excerpt</label>
             <textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} rows={3}
-              placeholder="Brief description (auto-generated from content if left empty)" className="input resize-none" />
-            <p className="text-xs text-gray-400 mt-1">{excerpt.length}/160 characters</p>
+              placeholder="Short description (auto-generated if left empty)" className="input resize-none" />
+            <p className="text-xs text-gray-400 mt-1">{excerpt.length}/160</p>
           </div>
 
           {/* SEO accordion */}
           <div className="card overflow-visible">
             <button type="button" onClick={() => setSeoOpen(!seoOpen)}
               className="w-full flex items-center justify-between p-4 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <span>Advanced SEO Settings</span>
+              Advanced SEO Settings
               {seoOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {seoOpen && (
               <div className="p-4 pt-0 space-y-4 border-t border-gray-100 dark:border-gray-800">
                 <div>
                   <label className="label">Meta Title</label>
-                  <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)} placeholder={title || 'Defaults to article title'} className="input" />
+                  <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)}
+                    placeholder={title || 'Defaults to article title'} className="input" />
                 </div>
                 <div>
                   <label className="label">Meta Description</label>
-                  <textarea value={metaDesc} onChange={e => setMetaDesc(e.target.value)} rows={2} placeholder="Defaults to excerpt…" className="input resize-none" />
+                  <textarea value={metaDesc} onChange={e => setMetaDesc(e.target.value)}
+                    rows={2} placeholder="Defaults to excerpt…" className="input resize-none" />
                 </div>
                 <div>
-                  <label className="label">SEO Keywords (comma-separated)</label>
-                  <input value={seoKeywords} onChange={e => setSeoKeywords(e.target.value)} placeholder="smartphone, review, best…" className="input" />
+                  <label className="label">SEO Keywords</label>
+                  <input value={seoKeywords} onChange={e => setSeoKeywords(e.target.value)}
+                    placeholder="keyword1, keyword2…" className="input" />
                 </div>
                 <div>
                   <label className="label">Canonical URL</label>
-                  <input value={canonical} onChange={e => setCanonical(e.target.value)} placeholder="https://vyom.quest/blog/…" className="input" />
+                  <input value={canonical} onChange={e => setCanonical(e.target.value)}
+                    placeholder="https://vyom.quest/blog/…" className="input" />
                 </div>
               </div>
             )}
@@ -188,7 +187,7 @@ export default function ArticleEditorForm({ article }: Props) {
         {/* Sidebar */}
         <div className="space-y-5">
           <div className="card p-4 space-y-4">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Publish Settings</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Publish</h3>
             <div>
               <label className="label">Status</label>
               <select value={status} onChange={e => setStatus(e.target.value)} className="input">
@@ -200,7 +199,8 @@ export default function ArticleEditorForm({ article }: Props) {
             {status === 'scheduled' && (
               <div>
                 <label className="label">Schedule For</label>
-                <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} className="input" />
+                <input type="datetime-local" value={scheduledAt}
+                  onChange={e => setScheduledAt(e.target.value)} className="input" />
               </div>
             )}
             <div>
@@ -221,7 +221,8 @@ export default function ArticleEditorForm({ article }: Props) {
 
           <div className="card p-4 space-y-3">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Featured Image</h3>
-            <input value={featuredImage} onChange={e => setFeaturedImage(e.target.value)} placeholder="https://example.com/image.jpg" className="input text-xs" />
+            <input value={featuredImage} onChange={e => setFeaturedImage(e.target.value)}
+              placeholder="https://example.com/image.jpg" className="input text-xs" />
             {featuredImage && (
               <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -233,7 +234,8 @@ export default function ArticleEditorForm({ article }: Props) {
 
           <div className="card p-4">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-3">Tags</h3>
-            <input value={tags} onChange={e => setTags(e.target.value)} placeholder="smartphones, review, android" className="input text-xs" />
+            <input value={tags} onChange={e => setTags(e.target.value)}
+              placeholder="smartphones, review, android" className="input text-xs" />
             <p className="text-xs text-gray-400 mt-1.5">Comma-separated</p>
           </div>
         </div>
