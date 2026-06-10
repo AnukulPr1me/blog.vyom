@@ -66,6 +66,7 @@ export default function RichEditor({ value, onChange }: Props) {
     const url = window.prompt('Enter image URL:');
     if (url) {
       ref.current?.focus();
+      // eslint-disable-next-line @next/next/no-img-element
       const img = `<img src="${url}" alt="" style="max-width:100%;border-radius:8px;margin:8px 0;" />`;
       document.execCommand('insertHTML', false, img);
       handleInput();

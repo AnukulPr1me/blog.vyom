@@ -22,7 +22,7 @@ export default function ArticleEditorForm({ article }: Props) {
   const [category, setCategory] = useState((article?.category as any)?._id || '');
   const [author, setAuthor] = useState((article?.author as any)?._id || '');
   const [tags, setTags] = useState(article?.tags?.join(', ') || '');
-  const [status, setStatus] = useState<Article['status']>(article?.status || 'draft');
+  const [status, setStatus] = useState(article?.status || 'draft');
   const [scheduledAt, setScheduledAt] = useState(
     article?.scheduledAt ? new Date(article.scheduledAt).toISOString().slice(0, 16) : ''
   );
@@ -190,11 +190,7 @@ export default function ArticleEditorForm({ article }: Props) {
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Publish</h3>
             <div>
               <label className="label">Status</label>
-              <select
-                value={status}
-                onChange={e => setStatus(e.target.value as Article['status'])}
-                className="input"
-              >
+              <select value={status} onChange={e => setStatus(e.target.value)} className="input">
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
                 <option value="scheduled">Scheduled</option>
@@ -229,6 +225,7 @@ export default function ArticleEditorForm({ article }: Props) {
               placeholder="https://example.com/image.jpg" className="input text-xs" />
             {featuredImage && (
               <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={featuredImage} alt="Preview" className="w-full h-full object-cover"
                   onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />

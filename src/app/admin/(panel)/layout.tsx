@@ -23,23 +23,43 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('Admin');
+  const [userEmail, setUserEmail] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Check token exists - middleware already validated it server-side
     const token = Cookies.get('vyom_token');
-    if (!token) { router.replace('/admin/login'); return; }
+    if (!token) {
+      router.replace('/admin/login');
+      return;
+    }
+    // Show panel immediately - don't block on API call
+    setReady(true);
+    // Fetch user info in background (non-blocking)
     fetch('/api/auth', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then(u => { setUser(u); setLoading(false); })
-      .catch(() => { Cookies.remove('vyom_token'); router.replace('/admin/login'); });
+      .then(r => r.ok ? r.json() : null)
+      .then(u => {
+        if (u) {
+          setUserName(u.name || 'Admin');
+          setUserEmail(u.email || '');
+        } else {
+          // Token invalid - clear and redirect
+          Cookies.remove('vyom_token');
+          router.replace('/admin/login');
+        }
+      })
+      .catch(() => {
+        // Network error - still show panel (token may be valid)
+        // Middleware will catch truly invalid tokens on next request
+      });
   }, [router]);
 
   const logout = () => {
-    fetch('/api/auth', { method: 'DELETE' });
+    fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
     Cookies.remove('vyom_token');
     router.push('/admin/login');
   };
@@ -47,22 +67,19 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-gray-400">Loading…</p>
-      </div>
-    </div>
-  );
+  // Show nothing until client hydrates (avoids SSR mismatch)
+  if (!mounted) return null;
+
+  // If no token, show nothing (redirect is in progress)
+  if (!ready && !Cookies.get('vyom_token')) return null;
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-5 border-b border-gray-100 dark:border-gray-800">
         <Link href="/" target="_blank" className="flex items-center gap-1 group">
-          <span className="text-xl font-bold text-brand-600 dark:text-brand-400" style={{ fontFamily: 'var(--font-syne)' }}>Vyom</span>
+          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400" style={{ fontFamily: 'var(--font-syne)' }}>Vyom</span>
           <span className="text-gray-400 text-xs">.quest</span>
-          <ExternalLink size={10} className="text-gray-300 group-hover:text-brand-400 ml-1" />
+          <ExternalLink size={10} className="text-gray-300 group-hover:text-indigo-400 ml-1" />
         </Link>
         <p className="text-xs text-gray-400 mt-0.5">Admin Panel</p>
       </div>
@@ -72,8 +89,8 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
           <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               isActive(href, exact)
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
             }`}>
             <Icon size={16} />{label}
           </Link>
@@ -81,12 +98,10 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
       </nav>
 
       <div className="p-3 border-t border-gray-100 dark:border-gray-800">
-        {user && (
-          <div className="px-3 py-2 mb-1">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
-            <p className="text-xs text-gray-400 truncate">{user.email}</p>
-          </div>
-        )}
+        <div className="px-3 py-2 mb-1">
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{userName}</p>
+          {userEmail && <p className="text-xs text-gray-400 truncate">{userEmail}</p>}
+        </div>
         <button onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
           <LogOut size={16} />Logout
@@ -112,7 +127,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         </div>
       )}
 
-      {/* Main */}
+      {/* Main content */}
       <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
         <header className="sticky top-0 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-100 dark:border-gray-800 px-4 sm:px-6 h-14 flex items-center justify-between">
           <button onClick={() => setSidebarOpen(true)}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth-edge';
+import { verifyToken } from '@/lib/auth';
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Protect all /admin routes except login
@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
-    const payload = await verifyToken(token);
+    const payload = verifyToken(token);
     if (!payload) {
       const res = NextResponse.redirect(new URL('/admin/login', req.url));
       res.cookies.delete('vyom_token');

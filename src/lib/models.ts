@@ -133,7 +133,7 @@ const ArticleSchema = new Schema<IArticle>(
     publishedAt: Date,
     viewCount: { type: Number, default: 0 },
     readingTime: { type: Number, default: 1 },
-    revisions: { type: Array as any, default: [], select: false },
+    revisions: { type: [Schema.Types.Mixed], default: [], select: false },
   },
   { timestamps: true }
 );

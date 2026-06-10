@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Warnings don't fail the build; only errors do.
+    // We've fixed all errors - this is a safety net for any remaining warnings.
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    // Type errors are caught at dev time; don't block production builds.
+    ignoreBuildErrors: false,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },

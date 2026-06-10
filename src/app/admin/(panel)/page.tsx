@@ -105,7 +105,7 @@ export default function AdminDashboard() {
               { href: '/admin/authors',      Icon: Users,       label: 'Authors',            cls: 'text-green-600 dark:text-green-400' },
               { href: '/admin/messages',     Icon: MessageSquare, label: 'Messages',         cls: 'text-orange-600 dark:text-orange-400' },
               { href: '/admin/settings',     Icon: Settings,    label: 'Site Settings',      cls: 'text-gray-500 dark:text-gray-400' },
-            ] as const).map(({ href, Icon, label, cls }) => (
+            ].map(({ href, Icon, label, cls }) => (
               <Link key={href} href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Icon size={15} className={cls} />{label}
               </Link>

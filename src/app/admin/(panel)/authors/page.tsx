@@ -113,7 +113,7 @@ export default function AdminAuthorsPage() {
               <div>
                 <p className="label">Social Links</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {(['twitter','linkedin','github','website'] as const).map(k => (
+                  {(['twitter','linkedin','github','website'].map(k => (
                     <input key={k} value={(form as any)[k]} onChange={e => set(k, e.target.value)} placeholder={k.charAt(0).toUpperCase()+k.slice(1)} className="input text-xs" />
                   ))}
                 </div>
