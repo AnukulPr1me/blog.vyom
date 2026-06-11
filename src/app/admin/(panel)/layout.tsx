@@ -22,7 +22,7 @@ const NAV = [
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   const [userName,    setUserName]    = useState('Admin');
   const [userEmail,   setUserEmail]   = useState('');
@@ -151,11 +151,11 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
           <div className="flex items-center gap-2 ml-auto">
             {themeReady && (
               <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                 className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle theme"
               >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
             )}
             <Link href="/admin/articles/new" className="btn-primary text-xs px-3 py-2">

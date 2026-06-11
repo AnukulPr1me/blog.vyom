@@ -22,11 +22,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
+        {/* AdSense */}
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        {/* storageKey ensures the persisted preference key is consistent */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          storageKey="vyom-theme"
+          disableTransitionOnChange
+        >
           {children}
-          <Toaster position="top-right" toastOptions={{ className: '!text-sm', duration: 4000 }} />
+          <Toaster
+            position="top-right"
+            toastOptions={{ className: '!text-sm', duration: 4000 }}
+          />
         </ThemeProvider>
       </body>
     </html>

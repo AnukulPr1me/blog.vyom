@@ -101,15 +101,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6 leading-relaxed">
-          First time? Run{' '}
-          <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono text-xs">
-            npm run seed
-          </code>{' '}
-          to create the admin account.
-        </p>
-      </div>
+</div>
     </div>
   );
 }

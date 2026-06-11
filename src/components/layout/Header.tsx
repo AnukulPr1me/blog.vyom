@@ -14,7 +14,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -67,8 +67,8 @@ export default function Header() {
           <div className="flex items-center gap-1">
             <Link href="/search" className={iconBtnCls} aria-label="Search"><Search size={18} /></Link>
             {mounted && (
-              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={iconBtnCls} aria-label="Toggle theme">
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              <button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')} className={iconBtnCls} aria-label="Toggle theme">
+                {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             )}
             <button onClick={() => setMenuOpen(!menuOpen)} className={cn(iconBtnCls, 'lg:hidden')} aria-label="Menu">
