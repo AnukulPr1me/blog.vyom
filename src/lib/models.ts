@@ -65,13 +65,10 @@ const AuthorSchema = new Schema<IAuthor>(
     avatar: String,
     bio: String,
     socialLinks: {
-      type: {
-        twitter: String,
-        linkedin: String,
-        github: String,
-        website: String,
-      },
-      default: {},
+      twitter: String,
+      linkedin: String,
+      github: String,
+      website: String,
     },
     isActive: { type: Boolean, default: true },
   },
@@ -111,10 +108,11 @@ export interface IArticle extends Document {
   publishedAt?: Date;
   viewCount: number;
   readingTime: number;
-  revisions: any[];
+  revisions: mongoose.Types.DocumentArray<any>;
 }
 
-const ArticleSchema = new Schema<IArticle>(
+// Use mongoose.Schema.Types.Mixed correctly — NOT in an array wrapper
+const ArticleSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -133,7 +131,8 @@ const ArticleSchema = new Schema<IArticle>(
     publishedAt: Date,
     viewCount: { type: Number, default: 0 },
     readingTime: { type: Number, default: 1 },
-    revisions: { type: [Schema.Types.Mixed], default: [], select: false },
+    // Use Mixed directly (not wrapped in []) to avoid TS type conflict
+    revisions: { type: Schema.Types.Mixed, default: [], select: false },
   },
   { timestamps: true }
 );
@@ -192,11 +191,19 @@ const SettingSchema = new Schema<ISetting>(
 );
 
 // ─── Export models (safe for Next.js hot-reload) ──────────────────────────────
-export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
-export const Category = mongoose.models.Category || mongoose.model<ICategory>('Category', CategorySchema);
-export const Author = mongoose.models.Author || mongoose.model<IAuthor>('Author', AuthorSchema);
-export const Tag = mongoose.models.Tag || mongoose.model<ITag>('Tag', TagSchema);
-export const Article = mongoose.models.Article || mongoose.model<IArticle>('Article', ArticleSchema);
-export const Subscriber = mongoose.models.Subscriber || mongoose.model<ISubscriber>('Subscriber', SubscriberSchema);
-export const Contact = mongoose.models.Contact || mongoose.model<IContact>('Contact', ContactSchema);
-export const Setting = mongoose.models.Setting || mongoose.model<ISetting>('Setting', SettingSchema);
+export const User = (mongoose.models.User as mongoose.Model<IUser>) ||
+  mongoose.model<IUser>('User', UserSchema);
+export const Category = (mongoose.models.Category as mongoose.Model<ICategory>) ||
+  mongoose.model<ICategory>('Category', CategorySchema);
+export const Author = (mongoose.models.Author as mongoose.Model<IAuthor>) ||
+  mongoose.model<IAuthor>('Author', AuthorSchema);
+export const Tag = (mongoose.models.Tag as mongoose.Model<ITag>) ||
+  mongoose.model<ITag>('Tag', TagSchema);
+export const Article = (mongoose.models.Article as mongoose.Model<any>) ||
+  mongoose.model('Article', ArticleSchema);
+export const Subscriber = (mongoose.models.Subscriber as mongoose.Model<ISubscriber>) ||
+  mongoose.model<ISubscriber>('Subscriber', SubscriberSchema);
+export const Contact = (mongoose.models.Contact as mongoose.Model<IContact>) ||
+  mongoose.model<IContact>('Contact', ContactSchema);
+export const Setting = (mongoose.models.Setting as mongoose.Model<ISetting>) ||
+  mongoose.model<ISetting>('Setting', SettingSchema);
