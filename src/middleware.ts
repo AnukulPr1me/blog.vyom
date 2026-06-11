@@ -1,22 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Middleware runs on the Edge Runtime — cannot use Node.js APIs (bcryptjs, jsonwebtoken).
- * We do a lightweight JWT structure check here.
- * Full cryptographic verification happens in requireAuth() inside each API route (Node.js runtime).
+ * Edge Runtime middleware — no Node.js APIs allowed.
+ * Validates JWT structure and expiry without crypto verification.
+ * Full cryptographic verification happens in each API route (Node.js runtime).
  */
-function hasValidTokenStructure(token: string): boolean {
+function isTokenValid(token: string): boolean {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return false;
-    // Decode payload (base64url)
-    const payload = JSON.parse(
-      Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
-    );
+
+    // Decode base64url payload
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '==='.slice((base64.length + 3) % 4);
+    const payload = JSON.parse(atob(padded));
+
     // Check expiry
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return false;
-    // Check it has required fields
-    if (!payload.sub || !payload.email) return false;
+
+    // Accept tokens with either "sub" (standard) or "userId" (our legacy field)
+    const hasId = payload.sub || payload.userId;
+    const hasEmail = payload.email;
+    if (!hasId || !hasEmail) return false;
+
     return true;
   } catch {
     return false;
@@ -26,10 +32,13 @@ function hasValidTokenStructure(token: string): boolean {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // Only protect /admin/* routes — but NOT /admin/login
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const token = req.cookies.get('vyom_token')?.value;
-    if (!token || !hasValidTokenStructure(token)) {
-      const res = NextResponse.redirect(new URL('/admin/login', req.url));
+
+    if (!token || !isTokenValid(token)) {
+      const loginUrl = new URL('/admin/login', req.url);
+      const res = NextResponse.redirect(loginUrl);
       res.cookies.delete('vyom_token');
       return res;
     }
