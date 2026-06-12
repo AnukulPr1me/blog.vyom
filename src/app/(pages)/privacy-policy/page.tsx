@@ -31,9 +31,9 @@ export default function PrivacyPage() {
           <h2>Data Retention</h2>
           <p>Newsletter subscriber emails are retained until you unsubscribe. Contact form messages are retained for 1 year.</p>
           <h2>Your Rights</h2>
-          <p>You may request access to, correction, or deletion of your personal data by emailing <a href="mailto:hello@vyom.quest">hello@vyom.quest</a>.</p>
+          <p>You may request access to, correction, or deletion of your personal data by emailing <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
           <h2>Contact</h2>
-          <p>Questions about this policy? Email <a href="mailto:hello@vyom.quest">hello@vyom.quest</a>.</p>
+          <p>Questions about this policy? Email <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
         </div>
       </div>
     </PublicLayout>

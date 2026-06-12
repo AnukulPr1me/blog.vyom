@@ -1,18 +1,6 @@
-'use client';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-interface Ad {
-  _id: string;
-  name: string;
-  imageUrl: string;
-  linkUrl: string;
-  placement: string;
-  isActive: boolean;
-  opensInNewTab: boolean;
-  order: number;
-}
+import { getAdsByPlacement } from '@/lib/server-api';
 
 interface Props {
   placement: 'header' | 'sidebar' | 'in-article' | 'footer' | 'homepage-banner';
@@ -20,62 +8,63 @@ interface Props {
   maxAds?: number;
 }
 
-// Aspect ratios & sizing per placement
+// Aspect ratios & sizing per placement — keeps layout clean and prevents
+// content jump (CLS) since the container size is fixed before the image loads.
 const PLACEMENT_CONFIG: Record<string, {
   containerClass: string;
   imageClass: string;
   label: string;
+  sizes: string;
 }> = {
   'homepage-banner': {
     containerClass: 'w-full rounded-2xl overflow-hidden',
     imageClass: 'w-full aspect-[728/90] sm:aspect-[970/90] relative',
     label: 'Advertisement',
+    sizes: '(max-width: 768px) 100vw, 970px',
   },
   header: {
     containerClass: 'w-full rounded-xl overflow-hidden',
     imageClass: 'w-full aspect-[728/90] relative',
     label: 'Advertisement',
+    sizes: '(max-width: 768px) 100vw, 728px',
   },
   sidebar: {
     containerClass: 'w-full rounded-xl overflow-hidden',
     imageClass: 'w-full aspect-[300/250] relative',
     label: 'Advertisement',
+    sizes: '300px',
   },
   'in-article': {
     containerClass: 'w-full max-w-2xl mx-auto rounded-xl overflow-hidden',
     imageClass: 'w-full aspect-[728/90] relative',
     label: 'Sponsored',
+    sizes: '728px',
   },
   footer: {
     containerClass: 'w-full rounded-xl overflow-hidden',
     imageClass: 'w-full aspect-[728/90] relative',
     label: 'Advertisement',
+    sizes: '(max-width: 768px) 100vw, 728px',
   },
 };
 
-export default function AdBanner({ placement, className = '', maxAds = 1 }: Props) {
-  const [ads, setAds] = useState<Ad[]>([]);
-  const [loaded, setLoaded] = useState(false);
+/**
+ * Server component — fetches ads directly from MongoDB during page render.
+ * No client-side fetch, no loading flash, no layout shift.
+ * Renders nothing (not even a wrapper div) if there are no active ads
+ * for this placement, so disabled/empty placements take up zero space.
+ */
+export default async function AdBanner({ placement, className = '', maxAds = 1 }: Props) {
+  const ads = await getAdsByPlacement(placement, maxAds);
 
-  useEffect(() => {
-    fetch(`/api/ads?placement=${placement}`)
-      .then(r => r.ok ? r.json() : [])
-      .then(data => {
-        setAds(Array.isArray(data) ? data.slice(0, maxAds) : []);
-        setLoaded(true);
-      })
-      .catch(() => setLoaded(true));
-  }, [placement, maxAds]);
-
-  // Don't render anything while loading or if no active ads
-  if (!loaded || ads.length === 0) return null;
+  if (!ads || ads.length === 0) return null;
 
   const config = PLACEMENT_CONFIG[placement] || PLACEMENT_CONFIG['sidebar'];
 
   return (
     <div className={`ad-container ${className}`}>
-      {ads.map(ad => (
-        <div key={ad._id} className={config.containerClass}>
+      {(ads as any[]).map(ad => (
+        <div key={String(ad._id)} className={config.containerClass}>
           <p className="text-[10px] text-gray-400 text-center mb-1 tracking-widest uppercase">
             {config.label}
           </p>
@@ -92,13 +81,7 @@ export default function AdBanner({ placement, className = '', maxAds = 1 }: Prop
                 alt={ad.name}
                 fill
                 className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                sizes={
-                  placement === 'sidebar'
-                    ? '300px'
-                    : placement === 'homepage-banner' || placement === 'header'
-                      ? '(max-width: 768px) 100vw, 970px'
-                      : '728px'
-                }
+                sizes={config.sizes}
                 unoptimized={ad.imageUrl.includes('?') || ad.imageUrl.startsWith('http')}
               />
             </div>

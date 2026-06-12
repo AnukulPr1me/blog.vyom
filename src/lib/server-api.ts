@@ -82,3 +82,82 @@ export async function getArticlesByAuthor(authorId: string) {
     .populate('category', 'name slug').sort({ publishedAt: -1 })
     .select('-content -revisions').lean();
 }
+
+// ─── Site Settings ──────────────────────────────────────────────────────────
+import { Setting } from './models';
+
+export interface SiteSettings {
+  siteName: string;
+  siteTagline: string;
+  siteUrl: string;
+  siteEmail: string;
+  metaDescription: string;
+  googleAnalyticsId: string;
+  adsensePublisherId: string;
+  socialLinks: {
+    twitter: string;
+    facebook: string;
+    instagram: string;
+    youtube: string;
+  };
+}
+
+const SITE_SETTINGS_DEFAULTS: SiteSettings = {
+  siteName: 'Vyom',
+  siteTagline: 'Your Tech Universe',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://vyom.quest',
+  siteEmail: 'hi.kio2002@gmail.com',
+  metaDescription: 'Vyom is your go-to source for tech news, smartphone reviews, laptop guides, and AI insights.',
+  googleAnalyticsId: '',
+  adsensePublisherId: '',
+  socialLinks: { twitter: '', facebook: '', instagram: '', youtube: '' },
+};
+
+/**
+ * Fetch site-wide settings from the database, merged with sensible defaults.
+ * Used by the root layout for <title>, <meta description>, OpenGraph tags, etc.
+ * Cached for 60s via Next.js `revalidate` on the calling page/layout.
+ */
+export async function getSiteSettings(): Promise<SiteSettings> {
+  try {
+    await dbConnect();
+    const docs = await Setting.find().lean();
+    const obj: Record<string, any> = {};
+    docs.forEach((d: any) => { obj[d.key] = d.value; });
+
+    return {
+      siteName:           obj.siteName           || SITE_SETTINGS_DEFAULTS.siteName,
+      siteTagline:        obj.siteTagline        || SITE_SETTINGS_DEFAULTS.siteTagline,
+      siteUrl:            obj.siteUrl            || SITE_SETTINGS_DEFAULTS.siteUrl,
+      siteEmail:          obj.siteEmail          || SITE_SETTINGS_DEFAULTS.siteEmail,
+      metaDescription:    obj.metaDescription    || SITE_SETTINGS_DEFAULTS.metaDescription,
+      googleAnalyticsId:  obj.googleAnalyticsId  || SITE_SETTINGS_DEFAULTS.googleAnalyticsId,
+      adsensePublisherId: obj.adsensePublisherId || SITE_SETTINGS_DEFAULTS.adsensePublisherId,
+      socialLinks: {
+        twitter:   obj.socialLinks?.twitter   || '',
+        facebook:  obj.socialLinks?.facebook  || '',
+        instagram: obj.socialLinks?.instagram || '',
+        youtube:   obj.socialLinks?.youtube   || '',
+      },
+    };
+  } catch (e) {
+    console.error('getSiteSettings error:', e);
+    return SITE_SETTINGS_DEFAULTS;
+  }
+}
+
+// ─── Advertisements ─────────────────────────────────────────────────────────
+import { Ad } from './models';
+
+export async function getAdsByPlacement(placement: string, limit = 1) {
+  try {
+    await dbConnect();
+    return await Ad.find({ placement, isActive: true })
+      .sort({ order: 1, createdAt: -1 })
+      .limit(limit)
+      .lean();
+  } catch (e) {
+    console.error('getAdsByPlacement error:', e);
+    return [];
+  }
+}

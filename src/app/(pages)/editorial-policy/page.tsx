@@ -22,7 +22,7 @@ export default function EditorialPolicyPage() {
           <h2>Updates</h2>
           <p>We update articles when significant information changes, marking them with an &quot;Updated&quot; date and noting what changed.</p>
           <h2>Contact the Editorial Team</h2>
-          <p>Questions, corrections, or tips? Email <a href="mailto:editorial@vyom.quest">editorial@vyom.quest</a>.</p>
+          <p>Questions, corrections, or tips? Email <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
         </div>
       </div>
     </PublicLayout>

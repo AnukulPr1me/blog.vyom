@@ -27,7 +27,7 @@ const defaults: Settings = {
   siteName: 'Vyom',
   siteTagline: 'Your Tech Universe',
   siteUrl: 'https://vyom.quest',
-  siteEmail: 'hello@vyom.quest',
+  siteEmail: 'hi.kio2002@gmail.com',
   metaDescription: '',
   googleAnalyticsId: '',
   adsensePublisherId: '',
@@ -175,7 +175,7 @@ export default function AdminSettingsPage() {
               <label className="label">Contact Email</label>
               <input type="email" value={settings.siteEmail}
                 onChange={e => setField('siteEmail', e.target.value)}
-                className="input" placeholder="hello@vyom.quest" />
+                className="input" placeholder="hi.kio2002@gmail.com" />
             </div>
           </div>
           <div>

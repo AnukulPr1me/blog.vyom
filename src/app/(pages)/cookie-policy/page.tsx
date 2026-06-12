@@ -21,7 +21,7 @@ export default function CookiePolicyPage() {
           <h2>Managing Cookies</h2>
           <p>You can control cookies through your browser settings. Disabling certain cookies may affect site functionality. Visit <a href="https://www.aboutcookies.org" target="_blank" rel="noopener noreferrer">aboutcookies.org</a> for instructions per browser.</p>
           <h2>Contact</h2>
-          <p>Questions? Email <a href="mailto:hello@vyom.quest">hello@vyom.quest</a>.</p>
+          <p>Questions? Email <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
         </div>
       </div>
     </PublicLayout>

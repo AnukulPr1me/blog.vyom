@@ -15,7 +15,7 @@ export default function ContactPage() {
           <div className="lg:col-span-2 card p-8"><ContactForm /></div>
           <aside className="space-y-6">
             {[
-              { icon: Mail, title: 'Email', lines: ['hello@vyom.quest', 'editorial@vyom.quest'] },
+              { icon: Mail, title: 'Email', lines: ['hi.kio2002@gmail.com'] },
               { icon: MapPin, title: 'Location', lines: ['India'] },
               { icon: Clock, title: 'Response Time', lines: ['We typically reply within 24–48 hours on business days.'] },
             ].map(({ icon: Icon, title, lines }) => (

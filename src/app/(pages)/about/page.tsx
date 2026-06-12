@@ -26,7 +26,7 @@ export default function AboutPage() {
           <h2>Editorial Independence</h2>
           <p>Vyom maintains strict editorial independence. Our reviews and opinions are never influenced by advertisers or manufacturers. When we recommend a product, it&apos;s because we genuinely believe it&apos;s worth your attention.</p>
           <h2>Contact Us</h2>
-          <p>Have a tip, question, or partnership inquiry? Reach us at <a href="mailto:hello@vyom.quest">hello@vyom.quest</a> or use our <a href="/contact">contact form</a>.</p>
+          <p>Have a tip, question, or partnership inquiry? Reach us at <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a> or use our <a href="/contact">contact form</a>.</p>
         </div>
       </div>
     </PublicLayout>

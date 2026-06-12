@@ -63,7 +63,7 @@ async function seed() {
   // Default settings
   const defaults: Record<string, any> = {
     siteName: 'Vyom', siteTagline: 'Your Tech Universe',
-    siteUrl: 'https://vyom.quest', siteEmail: 'hello@vyom.quest',
+    siteUrl: 'https://vyom.quest', siteEmail: 'hi.kio2002@gmail.com',
     metaDescription: 'Vyom is your go-to source for tech news, smartphone reviews, laptop guides, and AI insights.',
     socialLinks: { twitter: '', facebook: '', instagram: '', youtube: '' },
     googleAnalyticsId: '', adsensePublisherId: '',

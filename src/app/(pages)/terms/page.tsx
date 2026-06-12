@@ -22,7 +22,7 @@ export default function TermsPage() {
           <h2>Changes</h2>
           <p>We may update these terms at any time. Continued use constitutes acceptance.</p>
           <h2>Contact</h2>
-          <p>Questions? Email <a href="mailto:hello@vyom.quest">hello@vyom.quest</a>.</p>
+          <p>Questions? Email <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
         </div>
       </div>
     </PublicLayout>

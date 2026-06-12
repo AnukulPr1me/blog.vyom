@@ -1,18 +1,43 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'react-hot-toast';
+import { getSiteSettings } from '@/lib/server-api';
 import '@/styles/globals.css';
 
-export const metadata: Metadata = {
-  title: { default: 'Vyom – Your Tech Universe', template: '%s | Vyom' },
-  description: 'Vyom is your go-to source for tech news, smartphone reviews, laptop guides, and AI insights.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://vyom.quest'),
-  openGraph: { type: 'website', siteName: 'Vyom', locale: 'en_US' },
-  twitter: { card: 'summary_large_image', site: '@vyomquest' },
-  robots: { index: true, follow: true },
-};
+// Revalidate metadata when settings change in admin (60s cache)
+export const revalidate = 60;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+
+  return {
+    title: {
+      default: `${settings.siteName} – ${settings.siteTagline}`,
+      template: `%s | ${settings.siteName}`,
+    },
+    description: settings.metaDescription,
+    metadataBase: new URL(settings.siteUrl),
+    openGraph: {
+      type: 'website',
+      siteName: settings.siteName,
+      locale: 'en_US',
+      title: `${settings.siteName} – ${settings.siteTagline}`,
+      description: settings.metaDescription,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: settings.socialLinks.twitter || undefined,
+      title: `${settings.siteName} – ${settings.siteTagline}`,
+      description: settings.metaDescription,
+    },
+    robots: { index: true, follow: true },
+  };
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
+  const adsenseId = settings.adsensePublisherId || process.env.NEXT_PUBLIC_ADSENSE_ID;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -23,16 +48,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
         {/* AdSense */}
-        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+        {adsenseId && (
           <script
             async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
             crossOrigin="anonymous"
           />
         )}
+        {/* Google Analytics */}
+        {settings.googleAnalyticsId && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${settings.googleAnalyticsId}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${settings.googleAnalyticsId}');
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body>
-        {/* storageKey ensures the persisted preference key is consistent */}
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

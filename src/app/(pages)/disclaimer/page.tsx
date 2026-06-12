@@ -16,7 +16,7 @@ export default function DisclaimerPage() {
           <h2>Affiliate Disclaimer</h2>
           <p>Some links on Vyom may be affiliate links. If you click and purchase, we may earn a small commission at no extra cost to you. We only recommend products and services we genuinely believe in.</p>
           <h2>Errors and Omissions</h2>
-          <p>While we strive for accuracy, tech information changes rapidly. If you find an error, please contact us at <a href="mailto:hello@vyom.quest">hello@vyom.quest</a>.</p>
+          <p>While we strive for accuracy, tech information changes rapidly. If you find an error, please contact us at <a href="mailto:hi.kio2002@gmail.com">hi.kio2002@gmail.com</a>.</p>
         </div>
       </div>
     </PublicLayout>
