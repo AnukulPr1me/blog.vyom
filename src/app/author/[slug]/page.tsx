@@ -6,11 +6,15 @@ import { Twitter, Linkedin, Github, Globe } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ArticleCard from '@/components/blog/ArticleCard';
 import Breadcrumb from '@/components/blog/Breadcrumb';
-import { getAuthorBySlug, getArticlesByAuthor } from '@/lib/server-api';
+import { getAuthorBySlug, getArticlesByAuthor, getAllAuthorSlugs } from '@/lib/server-api';
 import type { Article } from '@/types';
 
 export const revalidate = 120;
 type Props = { params: { slug: string } };
+
+export async function generateStaticParams() {
+  return getAllAuthorSlugs();
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const author = await getAuthorBySlug(params.slug) as any;

@@ -251,3 +251,43 @@ export async function getFooterCategories() {
     return [];
   }
 }
+
+/**
+ * All published article slugs — used by generateStaticParams() so every
+ * blog post is pre-rendered to static HTML at build time. Without this,
+ * Next.js renders each article on-demand on its FIRST visit after a
+ * deploy (or after the revalidate window expires), and that visitor
+ * pays the full DB query cost — the 3-4s delay.
+ */
+export async function getAllArticleSlugs() {
+  try {
+    await dbConnect();
+    const articles = await Article.find({ status: 'published' }).select('slug').lean();
+    return (articles as any[]).map(a => ({ slug: a.slug }));
+  } catch (e) {
+    console.error('getAllArticleSlugs error:', e);
+    return [];
+  }
+}
+
+export async function getAllCategorySlugs() {
+  try {
+    await dbConnect();
+    const cats = await Category.find({ isActive: true }).select('slug').lean();
+    return (cats as any[]).map(c => ({ slug: c.slug }));
+  } catch (e) {
+    console.error('getAllCategorySlugs error:', e);
+    return [];
+  }
+}
+
+export async function getAllAuthorSlugs() {
+  try {
+    await dbConnect();
+    const authors = await Author.find({ isActive: true }).select('slug').lean();
+    return (authors as any[]).map(a => ({ slug: a.slug }));
+  } catch (e) {
+    console.error('getAllAuthorSlugs error:', e);
+    return [];
+  }
+}

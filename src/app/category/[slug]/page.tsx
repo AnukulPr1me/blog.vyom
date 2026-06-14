@@ -3,11 +3,16 @@ import { notFound } from 'next/navigation';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ArticleCard from '@/components/blog/ArticleCard';
 import Breadcrumb from '@/components/blog/Breadcrumb';
-import { getCategoryBySlug, getPublishedArticles } from '@/lib/server-api';
+import { getCategoryBySlug, getPublishedArticles, getAllCategorySlugs } from '@/lib/server-api';
 import type { Article } from '@/types';
 
 export const revalidate = 60;
 type Props = { params: { slug: string }; searchParams: { page?: string } };
+
+// Pre-render the first page of every category at build time.
+export async function generateStaticParams() {
+  return getAllCategorySlugs();
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = await getCategoryBySlug(params.slug) as any;

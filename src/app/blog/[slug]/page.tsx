@@ -8,12 +8,25 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import ArticleCard from '@/components/blog/ArticleCard';
 import ShareButtons from '@/components/blog/ShareButtons';
 import Breadcrumb from '@/components/blog/Breadcrumb';
-import { getArticleBySlug, getRelatedArticles, incrementViewCount } from '@/lib/server-api';
+import { getArticleBySlug, getRelatedArticles, incrementViewCount, getAllArticleSlugs } from '@/lib/server-api';
 import type { Article } from '@/types';
 import AdBanner from '@/components/common/AdBanner';
 
 export const revalidate = 60;
 type Props = { params: { slug: string } };
+
+/**
+ * Pre-render every published article to static HTML at build time.
+ * Without this, each article's first visit after a deploy (or after the
+ * revalidate window) triggers a full on-demand SSR pass — that visitor
+ * pays the entire DB query cost, which is the 3-4s delay.
+ * New articles published after the build still work fine: Next.js
+ * generates them on first request and caches the result (ISR fallback).
+ */
+export async function generateStaticParams() {
+  const slugs = await getAllArticleSlugs();
+  return slugs;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug) as any;
