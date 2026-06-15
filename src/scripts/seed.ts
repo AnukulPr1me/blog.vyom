@@ -18,11 +18,13 @@ const UserSchema = new mongoose.Schema({ name: String, email: { type: String, un
 const CategorySchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, description: String, isActive: { type: Boolean, default: true }, order: Number, showInNav: { type: Boolean, default: true }, showInFooter: { type: Boolean, default: true } }, { timestamps: true });
 const AuthorSchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, email: String, avatar: String, bio: String, socialLinks: Object, isActive: { type: Boolean, default: true } }, { timestamps: true });
 const SettingSchema = new mongoose.Schema({ key: { type: String, unique: true }, value: mongoose.Schema.Types.Mixed }, { timestamps: true });
+const PhoneCategorySchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, description: String, icon: String, order: Number, isActive: { type: Boolean, default: true } }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);
 const Category = mongoose.model('Category', CategorySchema);
 const Author = mongoose.model('Author', AuthorSchema);
 const Setting = mongoose.model('Setting', SettingSchema);
+const PhoneCategory = mongoose.model('PhoneCategory', PhoneCategorySchema);
 
 async function seed() {
   console.log('\n🌱  Vyom – running seed script...\n');
@@ -58,6 +60,20 @@ async function seed() {
   if (!existingAuthor) {
     await Author.create({ name: ADMIN_NAME, slug: 'admin', email: ADMIN_EMAIL, bio: 'Tech enthusiast and writer at Vyom.', socialLinks: {}, isActive: true });
     console.log(`✅  Default author created`);
+  }
+
+  // Default phone categories
+  const phoneCats = [
+    { name: 'Budget',    slug: 'budget',    icon: 'Wallet',   order: 1, description: 'Great phones under a tight budget without compromising on essentials.' },
+    { name: 'Mid-Range', slug: 'midrange',  icon: 'Smartphone', order: 2, description: 'The sweet spot — solid performance and features at a fair price.' },
+    { name: 'Flagship',  slug: 'flagship',  icon: 'Crown',    order: 3, description: 'Top-tier phones with the best hardware money can buy.' },
+    { name: 'Camera',    slug: 'camera',    icon: 'Camera',   order: 4, description: 'Phones built around exceptional photography and video.' },
+    { name: 'Gaming',    slug: 'gaming',    icon: 'Gamepad2', order: 5, description: 'High-refresh displays and powerful chipsets for mobile gaming.' },
+  ];
+  for (const cat of phoneCats) {
+    const exists = await PhoneCategory.findOne({ slug: cat.slug });
+    if (!exists) { await PhoneCategory.create(cat); console.log(`✅  Phone category: ${cat.name}`); }
+    else console.log(`⚠️   Phone category exists: ${cat.name}`);
   }
 
   // Default settings

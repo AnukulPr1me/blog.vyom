@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import {
   LayoutDashboard, FileText, Tag, Users, FolderOpen,
-  Settings, MessageSquare, LogOut, Menu, Sun, Moon, ExternalLink, Megaphone,
+  Settings, MessageSquare, LogOut, Menu, Sun, Moon, ExternalLink, Megaphone, Smartphone, Layers,
 } from 'lucide-react';
 import Cookies from 'js-cookie';
 
@@ -13,6 +13,8 @@ const NAV = [
   { href: '/admin',            label: 'Dashboard',  icon: LayoutDashboard, exact: true },
   { href: '/admin/articles',   label: 'Articles',   icon: FileText },
   { href: '/admin/categories', label: 'Categories', icon: FolderOpen },
+  { href: '/admin/phones',     label: 'Phones',     icon: Smartphone },
+  { href: '/admin/phone-categories', label: 'Phone Categories', icon: Layers },
   { href: '/admin/authors',    label: 'Authors',    icon: Users },
   { href: '/admin/tags',       label: 'Tags',       icon: Tag },
   { href: '/admin/messages',   label: 'Messages',   icon: MessageSquare },

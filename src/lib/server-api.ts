@@ -253,16 +253,29 @@ export async function getFooterCategories() {
 }
 
 /**
- * All published article slugs — used by generateStaticParams() so every
- * blog post is pre-rendered to static HTML at build time. Without this,
- * Next.js renders each article on-demand on its FIRST visit after a
- * deploy (or after the revalidate window expires), and that visitor
- * pays the full DB query cost — the 3-4s delay.
+ * Article slugs to pre-render at build time via generateStaticParams().
+ *
+ * Capped at MAX_STATIC_ARTICLES (most recently published first) so build
+ * time stays bounded as your content library grows. Articles beyond this
+ * cap still work fine — Next.js generates them on-demand on first visit
+ * and caches the result for `revalidate` seconds (ISR fallback), so only
+ * the very first visitor to an old/rarely-visited article pays a one-time
+ * render cost instead of every visitor paying it forever.
+ *
+ * Raise this number as your traffic/build-time budget allows. At ~30
+ * articles this pre-renders everything; at 1000+ it pre-renders only the
+ * most recent/likely-to-be-visited ones.
  */
+const MAX_STATIC_ARTICLES = 200;
+
 export async function getAllArticleSlugs() {
   try {
     await dbConnect();
-    const articles = await Article.find({ status: 'published' }).select('slug').lean();
+    const articles = await Article.find({ status: 'published' })
+      .sort({ publishedAt: -1 })
+      .limit(MAX_STATIC_ARTICLES)
+      .select('slug')
+      .lean();
     return (articles as any[]).map(a => ({ slug: a.slug }));
   } catch (e) {
     console.error('getAllArticleSlugs error:', e);
@@ -288,6 +301,106 @@ export async function getAllAuthorSlugs() {
     return (authors as any[]).map(a => ({ slug: a.slug }));
   } catch (e) {
     console.error('getAllAuthorSlugs error:', e);
+    return [];
+  }
+}
+
+// ─── Phones ─────────────────────────────────────────────────────────────────
+import { PhoneCategory, Phone } from './models';
+
+export async function getActivePhoneCategories() {
+  try {
+    await dbConnect();
+    return await PhoneCategory.find({ isActive: true }).sort({ order: 1, name: 1 }).lean();
+  } catch (e) {
+    console.error('getActivePhoneCategories error:', e);
+    return [];
+  }
+}
+
+export async function getPhoneCategoryBySlug(slug: string) {
+  try {
+    await dbConnect();
+    return await PhoneCategory.findOne({ slug, isActive: true }).lean();
+  } catch (e) {
+    console.error('getPhoneCategoryBySlug error:', e);
+    return null;
+  }
+}
+
+export async function getFeaturedPhones(limit = 6) {
+  try {
+    await dbConnect();
+    return await Phone.find({ isActive: true, isFeatured: true })
+      .populate('category', 'name slug')
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+  } catch (e) {
+    console.error('getFeaturedPhones error:', e);
+    return [];
+  }
+}
+
+export async function getPhonesByCategory(categoryId: string, opts: { page?: number; limit?: number } = {}) {
+  const { page = 1, limit = 12 } = opts;
+  try {
+    await dbConnect();
+    const filter = { category: categoryId, isActive: true };
+    const skip = (page - 1) * limit;
+    const [phones, total] = await Promise.all([
+      Phone.find(filter).populate('category', 'name slug').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Phone.countDocuments(filter),
+    ]);
+    return { phones, total, page, totalPages: Math.ceil(total / limit) };
+  } catch (e) {
+    console.error('getPhonesByCategory error:', e);
+    return { phones: [], total: 0, page: 1, totalPages: 1 };
+  }
+}
+
+export const getPhoneBySlug = cache(async (slug: string) => {
+  try {
+    await dbConnect();
+    return await Phone.findOne({ slug, isActive: true }).populate('category', 'name slug description').lean();
+  } catch (e) {
+    console.error('getPhoneBySlug error:', e);
+    return null;
+  }
+});
+
+export async function getRelatedPhones(phoneId: string, categoryId: string, limit = 4) {
+  try {
+    await dbConnect();
+    return await Phone.find({ _id: { $ne: phoneId }, category: categoryId, isActive: true })
+      .populate('category', 'name slug')
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+  } catch (e) {
+    console.error('getRelatedPhones error:', e);
+    return [];
+  }
+}
+
+export async function getAllPhoneSlugs() {
+  try {
+    await dbConnect();
+    const phones = await Phone.find({ isActive: true }).select('slug').lean();
+    return (phones as any[]).map(p => ({ slug: p.slug }));
+  } catch (e) {
+    console.error('getAllPhoneSlugs error:', e);
+    return [];
+  }
+}
+
+export async function getAllPhoneCategorySlugs() {
+  try {
+    await dbConnect();
+    const cats = await PhoneCategory.find({ isActive: true }).select('slug').lean();
+    return (cats as any[]).map(c => ({ slug: c.slug }));
+  } catch (e) {
+    console.error('getAllPhoneCategorySlugs error:', e);
     return [];
   }
 }

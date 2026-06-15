@@ -86,3 +86,50 @@ export interface SiteSettings {
   adsensePublisherId?: string;
   socialLinks?: { twitter?: string; facebook?: string; instagram?: string; youtube?: string };
 }
+
+export interface PhoneCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  order: number;
+  isActive: boolean;
+}
+
+export interface PhoneSpecs {
+  display?: string;
+  processor?: string;
+  ram?: string;
+  storage?: string;
+  battery?: string;
+  charging?: string;
+  rearCamera?: string;
+  frontCamera?: string;
+  os?: string;
+  network?: string;
+  dimensions?: string;
+  weight?: string;
+  colors?: string;
+}
+
+export interface Phone {
+  _id: string;
+  name: string;
+  slug: string;
+  brand: string;
+  category: PhoneCategory;
+  price: number;
+  currency: string;
+  images: string[];
+  description: string;
+  specs: PhoneSpecs;
+  pros: string[];
+  cons: string[];
+  rating?: number;
+  buyLink?: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

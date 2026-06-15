@@ -61,3 +61,33 @@ export function shareUrl(platform: string, url: string, title: string): string {
   };
   return map[platform] || url;
 }
+
+/**
+ * Detect a video URL and return an embeddable iframe src, or null if not a
+ * recognized video link. Supports YouTube, Vimeo, and direct video files
+ * (.mp4, .webm, .ogg).
+ */
+export function parseVideoUrl(url: string): { type: 'youtube' | 'vimeo' | 'file'; embedUrl: string } | null {
+  const trimmed = url.trim();
+
+  // YouTube: youtube.com/watch?v=, youtu.be/, youtube.com/shorts/, youtube.com/embed/
+  const ytMatch = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (ytMatch) {
+    return { type: 'youtube', embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}` };
+  }
+
+  // Vimeo: vimeo.com/12345678
+  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch) {
+    return { type: 'vimeo', embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}` };
+  }
+
+  // Direct video file
+  if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(trimmed)) {
+    return { type: 'file', embedUrl: trimmed };
+  }
+
+  return null;
+}

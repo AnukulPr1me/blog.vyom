@@ -215,6 +215,101 @@ const AdSchema = new Schema<IAd>(
   { timestamps: true }
 );
 
+// ─── Phone Category ─────────────────────────────────────────────────────────
+export interface IPhoneCategory extends Document {
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  order: number;
+  isActive: boolean;
+}
+
+const PhoneCategorySchema = new Schema<IPhoneCategory>(
+  {
+    name:        { type: String, required: true, trim: true },
+    slug:        { type: String, required: true, unique: true, lowercase: true, trim: true },
+    description: String,
+    icon:        String, // lucide icon name, e.g. "Wallet", "Crown", "Camera", "Gamepad2"
+    order:       { type: Number, default: 0 },
+    isActive:    { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
+
+// ─── Phone ──────────────────────────────────────────────────────────────────
+export interface IPhoneSpecs {
+  display?: string;
+  processor?: string;
+  ram?: string;
+  storage?: string;
+  battery?: string;
+  charging?: string;
+  rearCamera?: string;
+  frontCamera?: string;
+  os?: string;
+  network?: string;
+  dimensions?: string;
+  weight?: string;
+  colors?: string;
+}
+
+export interface IPhone extends Document {
+  name: string;
+  slug: string;
+  brand: string;
+  category: Types.ObjectId;
+  price: number;
+  currency: string;
+  images: string[];
+  description: string;
+  specs: IPhoneSpecs;
+  pros: string[];
+  cons: string[];
+  rating?: number;
+  buyLink?: string;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+const PhoneSchema = new Schema<IPhone>(
+  {
+    name:     { type: String, required: true, trim: true },
+    slug:     { type: String, required: true, unique: true, lowercase: true, trim: true },
+    brand:    { type: String, required: true, trim: true },
+    category: { type: Schema.Types.ObjectId, ref: 'PhoneCategory', required: true },
+    price:    { type: Number, required: true, default: 0 },
+    currency: { type: String, default: '₹' },
+    images:   { type: [String], default: [] },
+    description: { type: String, default: '' },
+    specs: {
+      display:     String,
+      processor:   String,
+      ram:         String,
+      storage:     String,
+      battery:     String,
+      charging:    String,
+      rearCamera:  String,
+      frontCamera: String,
+      os:          String,
+      network:     String,
+      dimensions:  String,
+      weight:      String,
+      colors:      String,
+    },
+    pros: { type: [String], default: [] },
+    cons: { type: [String], default: [] },
+    rating:     { type: Number, min: 0, max: 5 },
+    buyLink:    String,
+    isActive:   { type: Boolean, default: true },
+    isFeatured: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+PhoneSchema.index({ category: 1, isActive: 1 });
+PhoneSchema.index({ slug: 1 });
+
 // ─── Export models (safe for Next.js hot-reload) ──────────────────────────────
 export const User = (mongoose.models.User as mongoose.Model<IUser>) ||
   mongoose.model<IUser>('User', UserSchema);
@@ -234,3 +329,7 @@ export const Setting = (mongoose.models.Setting as mongoose.Model<ISetting>) ||
   mongoose.model<ISetting>('Setting', SettingSchema);
 export const Ad = (mongoose.models.Ad as mongoose.Model<IAd>) ||
   mongoose.model<IAd>('Ad', AdSchema);
+export const PhoneCategory = (mongoose.models.PhoneCategory as mongoose.Model<IPhoneCategory>) ||
+  mongoose.model<IPhoneCategory>('PhoneCategory', PhoneCategorySchema);
+export const Phone = (mongoose.models.Phone as mongoose.Model<IPhone>) ||
+  mongoose.model<IPhone>('Phone', PhoneSchema);
