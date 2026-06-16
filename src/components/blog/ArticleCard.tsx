@@ -4,9 +4,9 @@ import { Clock, Eye } from 'lucide-react';
 import { formatDate, readingTimeLabel } from '@/lib/utils';
 import type { Article } from '@/types';
 
-interface Props { article: Article; variant?: 'default' | 'featured' | 'horizontal' | 'compact'; className?: string; }
+interface Props { article: Article; variant?: 'default' | 'featured' | 'horizontal' | 'compact'; className?: string; priority?: boolean; }
 
-export default function ArticleCard({ article, variant = 'default', className = '' }: Props) {
+export default function ArticleCard({ article, variant = 'default', className = '', priority = false }: Props) {
   const href = `/blog/${article.slug}`;
 
   if (variant === 'horizontal') return (
@@ -26,33 +26,63 @@ export default function ArticleCard({ article, variant = 'default', className = 
     </Link>
   );
 
-  if (variant === 'featured') return (
-    <Link href={href} className={`group block relative rounded-2xl overflow-hidden bg-gray-900 ${className || 'aspect-video'}`}>
-      {article.featuredImage && (
-        <Image src={article.featuredImage} alt={article.title} fill className="object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 max-h-[85%] overflow-hidden">
-        {article.category && (
-          <span className="inline-block px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-wider mb-2">{article.category.name}</span>
+  if (variant === 'featured') {
+    // 'hero' className = large left card (overlay text on image)
+    // 'h-full' or no className = side card (clean card: image top, text bottom)
+    const isHero = className.includes('aspect-');
+    if (isHero) return (
+      <Link href={href} className={`group block relative rounded-2xl overflow-hidden bg-gray-900 ${className}`}>
+        {article.featuredImage && (
+          <Image src={article.featuredImage} alt={article.title} fill className="object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500" sizes="(max-width: 768px) 100vw, 66vw" />
         )}
-        <h2 className="text-white text-base lg:text-xl font-bold line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ fontFamily: 'var(--font-syne)' }}>{article.title}</h2>
-        {article.excerpt && <p className="text-gray-300 text-sm mt-1.5 line-clamp-1 lg:line-clamp-2 hidden sm:block">{article.excerpt}</p>}
-        <div className="flex items-center gap-2 mt-2 lg:mt-3 text-xs text-gray-400">
-          {article.author && <span className="truncate max-w-[100px]">{article.author.name}</span>}
-          <span>·</span><span className="whitespace-nowrap">{formatDate(article.publishedAt)}</span>
-          <span className="hidden sm:inline">·</span>
-          <span className="hidden sm:flex items-center gap-1"><Clock size={10} />{readingTimeLabel(article.readingTime)}</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-7">
+          {article.category && (
+            <span className="inline-block px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-wider mb-3">{article.category.name}</span>
+          )}
+          <h2 className="text-white text-xl lg:text-2xl font-bold line-clamp-2 group-hover:text-indigo-300 transition-colors leading-snug" style={{ fontFamily: 'var(--font-syne)' }}>{article.title}</h2>
+          {article.excerpt && <p className="text-gray-300 text-sm mt-2 line-clamp-2 hidden sm:block leading-relaxed">{article.excerpt}</p>}
+          <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
+            {article.author && <span className="truncate max-w-[120px]">{article.author.name}</span>}
+            <span>·</span>
+            <span className="whitespace-nowrap">{formatDate(article.publishedAt)}</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="hidden sm:flex items-center gap-1"><Clock size={10} />{readingTimeLabel(article.readingTime)}</span>
+          </div>
         </div>
-      </div>
-    </Link>
-  );
+      </Link>
+    );
+    // Side card: fixed image + clean text below — no overlay clutter
+    return (
+      <Link href={href} className="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 hover:shadow-md transition-all duration-300 h-full">
+        <div className="relative h-36 bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden">
+          {article.featuredImage
+            ? <Image src={article.featuredImage} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
+            : <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40" />
+          }
+          {article.category && (
+            <span className="absolute top-2 left-2 px-2 py-0.5 bg-indigo-600/90 text-white text-[10px] font-bold rounded uppercase tracking-wide backdrop-blur-sm">{article.category.name}</span>
+          )}
+        </div>
+        <div className="p-3 flex flex-col flex-1">
+          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug" style={{ fontFamily: 'var(--font-syne)' }}>
+            {article.title}
+          </h3>
+          <div className="flex items-center gap-1.5 mt-auto pt-2 text-[11px] text-gray-400">
+            <span className="truncate">{article.author?.name}</span>
+            <span>·</span>
+            <span className="whitespace-nowrap flex-shrink-0"><Clock size={9} className="inline mr-0.5" />{readingTimeLabel(article.readingTime)}</span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link href={href} className="group card flex flex-col hover:shadow-lg hover:shadow-brand-100/30 dark:hover:shadow-brand-900/20 hover:-translate-y-0.5 transition-all duration-300">
       {article.featuredImage && (
         <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
-          <Image src={article.featuredImage} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+          <Image src={article.featuredImage} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" priority={priority} />
           {article.category && (
             <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-brand-600/90 backdrop-blur-sm text-white text-xs font-bold rounded-lg uppercase tracking-wide">{article.category.name}</span>
           )}

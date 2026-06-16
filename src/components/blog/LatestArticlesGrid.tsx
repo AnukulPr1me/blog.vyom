@@ -49,7 +49,7 @@ export default function LatestArticlesGrid({ initialArticles, initialPage, total
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {articles.map(a => <ArticleCard key={a._id} article={a} />)}
+        {articles.map((a, i) => <ArticleCard key={a._id} article={a} priority={i < 3} />)}
       </div>
 
       {hasMore && (

@@ -252,3 +252,24 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
 .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+
+
+/* ── Performance ── */
+/* Defer rendering of offscreen content — browser skips layout/paint
+   for sections below the fold until the user scrolls near them.
+   This is one of the highest-impact CSS optimizations for mobile. */
+footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
+}
+
+/* Prevent layout shift from images loading */
+img { max-width: 100%; height: auto; }
+
+/* Reduce motion for users who prefer it — improves perceived performance */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
