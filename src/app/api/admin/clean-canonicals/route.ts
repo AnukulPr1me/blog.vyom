@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Find all articles that have a canonicalUrl set
     const articles = await Article.find({
-      canonicalUrl: { $exists: true, $ne: null, $ne: '' },
+      canonicalUrl: { $exists: true, $nin: [null, ''] },
     }).select('_id title canonicalUrl slug').lean();
 
     const poisoned: string[] = [];
