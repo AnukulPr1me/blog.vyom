@@ -3,6 +3,37 @@ import { dbConnect } from '@/lib/db';
 import { Article } from '@/lib/models';
 import { requireAuth } from '@/lib/auth';
 import { makeSlug, calcReadingTime, generateExcerpt } from '@/lib/utils';
+
+/**
+ * Sanitize canonicalUrl: only allow URLs on this site (or empty/undefined).
+ * This prevents canonical hijacking where a bad actor stores an external URL
+ * (e.g. a gambling site) as the canonical, telling Google the "real" version
+ * of your content is on their domain — which kills your SEO rankings.
+ */
+function sanitizeCanonicalUrl(url: string | undefined): string | undefined {
+  if (!url || url.trim() === '') return undefined;
+
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://vyom.quest').replace(/\/$/, '');
+  const trimmed = url.trim();
+
+  // Allow relative paths (e.g. "/blog/my-post")
+  if (trimmed.startsWith('/')) return `${siteUrl}${trimmed}`;
+
+  // Allow full URLs only on our own domain
+  try {
+    const parsed = new URL(trimmed);
+    const ownHost = new URL(siteUrl).hostname;
+    if (parsed.hostname === ownHost || parsed.hostname === `www.${ownHost}`) {
+      return trimmed;
+    }
+  } catch {
+    // Not a valid URL — ignore it
+  }
+
+  // Any other value (external domain, invalid URL) is discarded
+  console.warn(`[security] Rejected external canonicalUrl: ${trimmed}`);
+  return undefined;
+}
 import { revalidatePath } from 'next/cache';
 
 export async function GET(req: NextRequest) {
@@ -70,8 +101,11 @@ export async function POST(req: NextRequest) {
     const seoKeywords = body.seoKeywords?.length ? body.seoKeywords : (body.tags || []);
     const publishedAt = body.status === 'published' ? new Date() : body.publishedAt || undefined;
 
+    const canonicalUrl = sanitizeCanonicalUrl(body.canonicalUrl);
+
     const article = await Article.create({
       ...body, slug, excerpt, readingTime, metaTitle, metaDescription, seoKeywords, publishedAt,
+      canonicalUrl, // sanitized — external domains stripped
     });
 
     // New published articles should appear immediately on the homepage,

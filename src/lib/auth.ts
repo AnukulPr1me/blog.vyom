@@ -2,7 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-change-in-prod';
+// SECURITY: JWT_SECRET must be set in environment variables.
+// If it is not set, we throw at startup rather than silently falling
+// back to a well-known default string that any attacker could use to
+// forge admin tokens. Set JWT_SECRET in your Vercel project settings.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET environment variable is not set. ' +
+    'Add it to your .env file (local) or Vercel project settings (production). ' +
+    'Generate a strong random value: openssl rand -hex 32'
+  );
+}
+
+// Minimum secret length — short secrets are brute-forceable
+if (JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters long.');
+}
 
 export interface JWTPayload {
   userId: string;
@@ -13,12 +29,12 @@ export interface JWTPayload {
 }
 
 export function signToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-  return jwt.sign({ ...payload, sub: payload.userId }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ ...payload, sub: payload.userId }, JWT_SECRET as string, { expiresIn: '7d' });
 }
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    return jwt.verify(token, JWT_SECRET as string) as JWTPayload;
   } catch {
     return null;
   }
@@ -32,30 +48,18 @@ export async function comparePassword(password: string, hash: string): Promise<b
   return bcrypt.compare(password, hash);
 }
 
-/** Extract token from Authorization header or cookie */
-export function extractToken(req: NextRequest): string | null {
-  const auth = req.headers.get('authorization');
-  if (auth?.startsWith('Bearer ')) return auth.slice(7);
-  const cookie = req.cookies.get('vyom_token');
-  if (cookie) return cookie.value;
-  return null;
-}
-
-/** Middleware: require valid JWT. Returns payload or 401 response */
 export function requireAuth(req: NextRequest): { payload: JWTPayload } | NextResponse {
-  const token = extractToken(req);
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const payload = verifyToken(token);
-  if (!payload) return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-  return { payload };
-}
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-/** Middleware: require admin role */
-export function requireAdmin(req: NextRequest): { payload: JWTPayload } | NextResponse {
-  const result = requireAuth(req);
-  if (result instanceof NextResponse) return result;
-  if (result.payload.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!token) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
-  return result;
+
+  const payload = verifyToken(token);
+  if (!payload) {
+    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+  }
+
+  return { payload };
 }

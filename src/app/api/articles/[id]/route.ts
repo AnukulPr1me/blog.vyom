@@ -3,6 +3,20 @@ import { dbConnect } from '@/lib/db';
 import { Article } from '@/lib/models';
 import { requireAuth } from '@/lib/auth';
 import { makeSlug, calcReadingTime, generateExcerpt } from '@/lib/utils';
+
+function sanitizeCanonicalUrl(url: string | undefined): string | undefined {
+  if (!url || url.trim() === '') return undefined;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://vyom.quest').replace(/\/$/, '');
+  const trimmed = url.trim();
+  if (trimmed.startsWith('/')) return `${siteUrl}${trimmed}`;
+  try {
+    const parsed = new URL(trimmed);
+    const ownHost = new URL(siteUrl).hostname;
+    if (parsed.hostname === ownHost || parsed.hostname === `www.${ownHost}`) return trimmed;
+  } catch { /* invalid URL */ }
+  console.warn(`[security] Rejected external canonicalUrl on update: ${trimmed}`);
+  return undefined;
+}
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 

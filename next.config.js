@@ -37,11 +37,18 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // Prevent clickjacking — stops your pages being embedded in iframes on other sites
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // Prevent MIME-type sniffing
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
+          // Don't send full referrer URL to external sites
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          // Allow AdSense
+          // Enforce HTTPS for 1 year — prevents downgrade attacks
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          // Control browser features
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // Basic XSS protection for older browsers
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
         ],
       },
       {
@@ -52,10 +59,16 @@ const nextConfig = {
         ],
       },
       {
-        // Cache fonts aggressively — they almost never change
         source: '/fonts/(.*)',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        // API routes — never cache, always fresh
+        source: '/api/(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
         ],
       },
     ];
