@@ -27,6 +27,10 @@ export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const catRef = useRef<HTMLDivElement>(null);
   const devRef = useRef<HTMLDivElement>(null);
+  // Delay timers — keep menu open briefly after cursor leaves so users
+  // don't have to be pixel-perfect moving from button to menu items.
+  const catTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const devTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -38,6 +42,14 @@ export default function Header() {
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setPhoneCategories(data.slice(0, 5)); })
       .catch(() => {});
+  }, []);
+
+  // Clear close timers on unmount
+  useEffect(() => {
+    return () => {
+      if (catTimer.current) clearTimeout(catTimer.current);
+      if (devTimer.current) clearTimeout(devTimer.current);
+    };
   }, []);
 
   // Close dropdowns when clicking outside
@@ -82,8 +94,8 @@ export default function Header() {
                 aria-expanded={catOpen}
                 aria-haspopup="true"
                 aria-controls="categories-menu"
-                onMouseEnter={() => setCatOpen(true)}
-                onMouseLeave={() => setCatOpen(false)}
+                onMouseEnter={() => { if (catTimer.current) clearTimeout(catTimer.current); setCatOpen(true); }}
+                onMouseLeave={() => { catTimer.current = setTimeout(() => setCatOpen(false), 150); }}
                 onClick={() => setCatOpen(v => !v)}
               >
                 Categories
@@ -95,8 +107,8 @@ export default function Header() {
                   role="menu"
                   aria-label="Article categories"
                   className="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-2 z-50"
-                  onMouseEnter={() => setCatOpen(true)}
-                  onMouseLeave={() => setCatOpen(false)}
+                  onMouseEnter={() => { if (catTimer.current) clearTimeout(catTimer.current); setCatOpen(true); }}
+                  onMouseLeave={() => { catTimer.current = setTimeout(() => setCatOpen(false), 150); }}
                 >
                   {categories.map(cat => (
                     <Link key={cat._id} href={`/category/${cat.slug}`} role="menuitem"
@@ -122,8 +134,8 @@ export default function Header() {
                 aria-expanded={devicesOpen}
                 aria-haspopup="true"
                 aria-controls="devices-menu"
-                onMouseEnter={() => setDevicesOpen(true)}
-                onMouseLeave={() => setDevicesOpen(false)}
+                onMouseEnter={() => { if (devTimer.current) clearTimeout(devTimer.current); setDevicesOpen(true); }}
+                onMouseLeave={() => { devTimer.current = setTimeout(() => setDevicesOpen(false), 150); }}
                 onClick={() => setDevicesOpen(v => !v)}
               >
                 Devices
@@ -135,8 +147,8 @@ export default function Header() {
                   role="menu"
                   aria-label="Device categories"
                   className="absolute top-full left-0 mt-1 w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-2 z-50"
-                  onMouseEnter={() => setDevicesOpen(true)}
-                  onMouseLeave={() => setDevicesOpen(false)}
+                  onMouseEnter={() => { if (devTimer.current) clearTimeout(devTimer.current); setDevicesOpen(true); }}
+                  onMouseLeave={() => { devTimer.current = setTimeout(() => setDevicesOpen(false), 150); }}
                 >
                   {DEVICE_TYPES.map(d => (
                     <Link key={d.href} href={d.href} role="menuitem"

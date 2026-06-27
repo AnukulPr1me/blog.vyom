@@ -86,8 +86,8 @@ export default async function HomePage() {
                 </h3>
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {trending.map((a: any, i: number) => (
-                    <Link key={a._id} href={`/blog/${a.slug}`} className="flex items-start gap-3 py-3 group first:pt-0 last:pb-0">
-                      <span className="text-2xl font-black text-gray-200 dark:text-gray-700 w-8 flex-shrink-0 leading-none pt-0.5 tabular-nums" style={{ fontFamily: 'var(--font-syne)' }}>
+                    <Link key={a._id} href={`/blog/${a.slug}`} className="flex items-start gap-4 py-3 group first:pt-0 last:pb-0">
+                      <span className="text-2xl font-black text-gray-200 dark:text-gray-700 w-10 flex-shrink-0 leading-none pt-0.5 tabular-nums" style={{ fontFamily: 'var(--font-syne)' }}>
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export default async function HomePage() {
                   <LaptopIcon size={14} className="text-indigo-400 flex-shrink-0" /><span className="truncate">Laptops</span>
                 </Link>
                 <Link href="/tablets" className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors">
-                  <PenTool size={14} className="text-indigo-400 flex-shrink-0" /><span className="truncate">Tablets</span>
+                  <PenTool size={14} className="text-indigo-400 flex-shrink-0" /><span className="truncate">Drawing Tablets</span>
                 </Link>
                 <Link href="/cameras" className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors">
                   <CameraIcon size={14} className="text-indigo-400 flex-shrink-0" /><span className="truncate">Cameras</span>
